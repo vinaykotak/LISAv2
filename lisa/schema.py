@@ -353,11 +353,18 @@ class RemoteNode:
             )
 
 
+FEATURE_NAME_RDMA = "RDMA"
+
+
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
-class IntegerRange:
-    min: int
-    max: int
+class Feature:
+    name: str = ""
+    enabled: bool = True
+
+
+class Features:
+    RDMA = Feature(name=FEATURE_NAME_RDMA)
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
@@ -377,14 +384,19 @@ class NodeSpec(ExtendableSchemaMixin):
         default=1,
         metadata=metadata(data_key="coreCount", validate=validate.Range(min=1)),
     )
-    memory_gb: int = field(
+    memory_mb: int = field(
+        default=2048,
+        metadata=metadata(data_key="memoryMb", validate=validate.Range(min=512)),
+    )
+    nic_count: int = field(
         default=1,
-        metadata=metadata(data_key="memoryGb", validate=validate.Range(min=1)),
+        metadata=metadata(data_key="nicCount", validate=validate.Range(min=1)),
     )
     gpu_count: int = field(
         default=0,
         metadata=metadata(data_key="gpuCount", validate=validate.Range(min=0)),
     )
+    features: Optional[List[Feature]] = field(default=None)
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
@@ -394,6 +406,8 @@ class Template(NodeSpec):
         default=1,
         metadata=metadata(data_key="nodeCount", validate=validate.Range(min=1)),
     )
+
+    type: str = constants.ENVIRONMENTS_NODES_SPEC
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)

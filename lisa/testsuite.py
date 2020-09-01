@@ -5,8 +5,9 @@ from abc import ABCMeta
 from dataclasses import dataclass
 from enum import Enum
 from functools import wraps
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Type
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type
 
+from lisa import requirement
 from lisa.action import Action, ActionStatus
 from lisa.util import LisaException
 from lisa.util.logger import get_logger
@@ -38,6 +39,7 @@ class TestSuiteMetadata:
         description: str,
         tags: List[str],
         name: str = "",
+        requirement: Optional[requirement.TestCase] = None,
     ) -> None:
         self.name = name
         self.cases: List[TestCaseMetadata] = []
@@ -49,6 +51,7 @@ class TestSuiteMetadata:
         else:
             self.tags = []
         self.description = description
+        self.requirement = requirement
 
     def __call__(self, test_class: Type[TestSuite]) -> Callable[..., object]:
         self.test_class = test_class
@@ -69,9 +72,15 @@ class TestSuiteMetadata:
 
 
 class TestCaseMetadata:
-    def __init__(self, description: str, priority: int = 2) -> None:
+    def __init__(
+        self,
+        description: str,
+        priority: int = 2,
+        requirement: Optional[requirement.TestCase] = None,
+    ) -> None:
         self.priority = priority
         self.description = description
+        self.requirement = requirement
 
     def __getattr__(self, key: str) -> Any:
         # inherit any attributes of metadata
